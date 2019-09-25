@@ -1,8 +1,9 @@
 import React from "react";
 import PianoKey from "./piano-key.jsx";
 import { keys, sky, start } from './key-config.js';
-import {Slider} from 'antd';
+import { Slider } from 'antd';
 import 'antd/lib/slider/style'
+import { request } from "http";
 class Piano extends React.Component {
     constructor(props) {
         super(props);
@@ -18,11 +19,36 @@ class Piano extends React.Component {
         this.recordIndex = 1;
         this.selectIndex = 0;
         this.speed = 1;
+        this.audios = {};
+        this.initAudios();
+    }
+    initAudios(){
+        let that = this;
+        keys.map((item)=>{
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            let context = new window.AudioContext();
+            let audio = window.audio = {};
+            let audioURL = "audio/" + item.voice + ".mp3";
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET',audioURL,true);
+            xhr.responseType = 'arraybuffer';
+            xhr.onload = () => {
+                context.decodeAudioData(request.response,(buffer)=>{
+                    source = context.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(context.destination);
+                    source.start();
+                    that.audios[item.voice] = source;
+                    window.audio.buffer = buffer;
+                })
+            }
+            xhr.send();
+        })
     }
     componentDidMount() {
 
     }
-    onSliderChange(value){
+    onSliderChange(value) {
         this.speed = value;
     }
     recordOption() {
@@ -63,9 +89,9 @@ class Piano extends React.Component {
         let that = this;
         clearTimeout(that.stepTimer);
         if (item) {
-            let miniTime = (record.miniTime ? record.miniTime : 1)/this.speed;
+            let miniTime = (record.miniTime ? record.miniTime : 1) / this.speed;
             let delay = item[1] * miniTime;
-            that.playPinalKey(item[0], true, delay - miniTime/3);
+            that.playPinalKey(item[0], true, delay - miniTime / 3);
             that.stepTimer = setTimeout(() => {
                 clearTimeout(that.stepTimer);
                 that.playStep(record, ++i);
@@ -153,7 +179,7 @@ class Piano extends React.Component {
                             </option>)
                     }
                 </select>
-                <Slider defaultValue={1} max={1.5} min={0.5} onChange={this.onSliderChange.bind(this)} step={0.01}/>
+                <Slider defaultValue={1} max={1.5} min={0.5} onChange={this.onSliderChange.bind(this)} step={0.01} />
                 <div style={{ display: "flex" }}>
                     {
                         this.state.keys.map(
@@ -161,6 +187,7 @@ class Piano extends React.Component {
                                 ref={node => this['btn' + value.voice] = node}
                                 onKeyPlayEnd={this.onKeyPlayEnd.bind(this, value)}
                                 key={index + 'key'}
+                                audio={() => this.audios[value.voice]}
                                 {...value}
                                 index={index} />
                         )
