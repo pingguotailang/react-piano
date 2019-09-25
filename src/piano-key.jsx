@@ -16,12 +16,22 @@ class PianoKey extends React.Component {
         this.props.onKeyPlayEnd && this.props.onKeyPlayEnd();
     }
     playMusic() {
-        // var audio = new Audio();
-        // // 设置好音频路径 
-        // audio.src = "audio/" + this.props.voice + ".mp3";
-        this.props.audio().play();
-        // 播放音频 
-        // audio.play();
+        if(this.props.playType){
+            let audio = new Audio();
+            // 设置好音频路径 
+            audio.src = "audio/" + this.props.voice + ".mp3";
+            // 播放音频 
+            audio.play();
+        }else{
+            let audio = this.props.audio();
+            // 播放音频 
+            var bufferSource = audio.context.createBufferSource();
+            bufferSource.buffer = audio.buffer;
+            bufferSource.connect(audio.context.destination);
+            bufferSource.loop = false;
+            bufferSource.start();  
+            }
+            
     }
     render() {
         return (

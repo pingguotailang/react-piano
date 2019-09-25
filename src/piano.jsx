@@ -1,9 +1,9 @@
 import React from "react";
 import PianoKey from "./piano-key.jsx";
 import { keys, sky, start } from './key-config.js';
-import { Slider } from 'antd';
-import 'antd/lib/slider/style'
-import { request } from "http";
+import { Slider, Switch } from 'antd';
+import 'antd/lib/slider/style';
+import 'antd/lib/switch/style';
 class Piano extends React.Component {
     constructor(props) {
         super(props);
@@ -11,7 +11,8 @@ class Piano extends React.Component {
             keys: keys,
             isRecord: false,
             records: [sky, start],
-            isPlaying: false
+            isPlaying: false,
+            playType:true,
         }
         // 当键盘点击时，调用音乐响应函数 
         window.onkeydown = this.onPlayKeyDown.bind(this);
@@ -26,20 +27,15 @@ class Piano extends React.Component {
         let that = this;
         keys.map((item)=>{
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            let context = new window.AudioContext();
-            let audio = window.audio = {};
+            let audio = {context:new window.AudioContext()};
             let audioURL = "audio/" + item.voice + ".mp3";
             let xhr = new XMLHttpRequest();
             xhr.open('GET',audioURL,true);
             xhr.responseType = 'arraybuffer';
-            xhr.onload = () => {
-                context.decodeAudioData(request.response,(buffer)=>{
-                    source = context.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(context.destination);
-                    source.start();
-                    that.audios[item.voice] = source;
-                    window.audio.buffer = buffer;
+            xhr.onload = (e) => {
+                audio.context.decodeAudioData(e.target.response,(buffer)=>{
+                    audio.buffer = buffer;
+                    that.audios[item.voice] = audio;
                 })
             }
             xhr.send();
@@ -179,6 +175,7 @@ class Piano extends React.Component {
                             </option>)
                     }
                 </select>
+                <Switch checked={this.state.playType} onChange={(b)=>this.setState({playType:b})}></Switch>
                 <Slider defaultValue={1} max={1.5} min={0.5} onChange={this.onSliderChange.bind(this)} step={0.01} />
                 <div style={{ display: "flex" }}>
                     {
@@ -188,6 +185,7 @@ class Piano extends React.Component {
                                 onKeyPlayEnd={this.onKeyPlayEnd.bind(this, value)}
                                 key={index + 'key'}
                                 audio={() => this.audios[value.voice]}
+                                playType={this.state.playType}
                                 {...value}
                                 index={index} />
                         )
