@@ -12,7 +12,6 @@ class Piano extends React.Component {
             isRecord: false,
             records: [sky, start],
             isPlaying: false,
-            playType:true,
         }
         // 当键盘点击时，调用音乐响应函数 
         window.onkeydown = this.onPlayKeyDown.bind(this);
@@ -21,9 +20,12 @@ class Piano extends React.Component {
         this.selectIndex = 0;
         this.speed = 1;
         this.audios = {};
-        this.initAudios();
+        if(window.location.host !== ''){
+            this.initAudios();
+        }
     }
     initAudios(){
+        this.audios = [];
         let that = this;
         keys.map((item)=>{
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -175,7 +177,6 @@ class Piano extends React.Component {
                             </option>)
                     }
                 </select>
-                <Switch checked={this.state.playType} onChange={(b)=>this.setState({playType:b})}></Switch>
                 <Slider defaultValue={1} max={1.5} min={0.5} onChange={this.onSliderChange.bind(this)} step={0.01} />
                 <div style={{ display: "flex" }}>
                     {
@@ -185,7 +186,6 @@ class Piano extends React.Component {
                                 onKeyPlayEnd={this.onKeyPlayEnd.bind(this, value)}
                                 key={index + 'key'}
                                 audio={() => this.audios[value.voice]}
-                                playType={this.state.playType}
                                 {...value}
                                 index={index} />
                         )

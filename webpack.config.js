@@ -18,7 +18,7 @@ module.exports = {
       title: '猎豹前端框架',
       template: './src/index.html' // 使用模版
     }),
-    new webpack.optimize.UglifyJsPlugin(),
+    // new webpack.optimize.UglifyJsPlugin(),
     new webpack.ProvidePlugin({
       _: 'lodash',
       $: 'jquery',

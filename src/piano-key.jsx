@@ -1,44 +1,45 @@
 import React from "react";
 import './keyless.less';
 class PianoKey extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
-            currentClassName : "key-up",
+            currentClassName: "key-up",
         }
     }
     keyDown = () => {
         this.playMusic();
-        this.setState({currentClassName:'key-down'});
+        this.setState({ currentClassName: 'key-down' });
     }
     keyUp = () => {
-        this.setState({currentClassName:'key-up'});
+        this.setState({ currentClassName: 'key-up' });
         this.props.onKeyPlayEnd && this.props.onKeyPlayEnd();
     }
     playMusic() {
-        if(this.props.playType){
+        //本地播放模式
+        if (window.location.host === "") {
             let audio = new Audio();
             // 设置好音频路径 
             audio.src = "audio/" + this.props.voice + ".mp3";
             // 播放音频 
             audio.play();
-        }else{
+        //在线播放模式
+        } else {
             let audio = this.props.audio();
             // 播放音频 
             var bufferSource = audio.context.createBufferSource();
             bufferSource.buffer = audio.buffer;
             bufferSource.connect(audio.context.destination);
             bufferSource.loop = false;
-            bufferSource.start();  
-            }
-            
+            bufferSource.start();
+        }
     }
     render() {
         return (
             <button
                 className={this.state.currentClassName}
                 onMouseDown={this.keyDown.bind(this)}
-                onMouseUp = {this.keyUp.bind(this)}
+                onMouseUp={this.keyUp.bind(this)}
                 style={{
                     background: this.props.color,
                     width: this.props.w,
