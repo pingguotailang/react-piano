@@ -79,7 +79,6 @@ export const sky = {
         ['e4',1],
         ['f4',1],
         ['c5',3]
-    
     ]
 }
 export const start = {

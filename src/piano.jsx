@@ -10,7 +10,7 @@ class Piano extends React.Component {
         this.state = {
             keys: keys,
             isRecord: false,
-            records: [sky, start],
+            records: [start,sky],
             isPlaying: false,
         }
         // 当键盘点击时，调用音乐响应函数 
@@ -24,6 +24,7 @@ class Piano extends React.Component {
             this.initAudios();
         }
     }
+    //初始化加载音频
     initAudios(){
         this.audios = [];
         let that = this;
@@ -54,7 +55,6 @@ class Piano extends React.Component {
         this.setState({ isRecord: !this.state.isRecord });
         if (isRecord) {
             this['music' + this.recordIndex] = [];
-            // let p = { key: undefined, time: 0 };
             let p = [undefined, 0];
             this.recordStartTime = new Date().getTime();
             this['music' + this.recordIndex].push(p);
@@ -191,7 +191,6 @@ class Piano extends React.Component {
                         )
                     }
                 </div>
-
             </div>
         )
     }
