@@ -1,16 +1,19 @@
 import React from "react";
 import PianoKey from "./piano-key.jsx";
-import { keys, sky, start } from './key-config.js';
+import {keys} from './key-config';
+import { sky, start ,wodezuguo} from './music-score.js';
 import { Slider, Switch } from 'antd';
 import 'antd/lib/slider/style';
 import 'antd/lib/switch/style';
 class Piano extends React.Component {
     constructor(props) {
         super(props);
+        let wo = this.musicScoreConvert(wodezuguo);
+        console.log(wo);
         this.state = {
             keys: keys,
             isRecord: false,
-            records: [start,sky],
+            records: [start,sky,wo],
             isPlaying: false,
         }
         // 当键盘点击时，调用音乐响应函数 
@@ -156,7 +159,29 @@ class Piano extends React.Component {
             this['music' + this.recordIndex].push(p);
         }
     }
-
+    musicScoreConvert = (mic) => {
+        const config = {
+            '1': 'c',
+            '2': 'd',
+            '3': 'e',
+            '4': 'f',
+            '5': 'g',
+            '6': 'a',
+            '7': 'b'
+        }
+        let returnMic = {};
+        returnMic.name = mic.name;
+        returnMic.miniTime = mic.miniTime;
+        returnMic.keys = [];
+        if (mic && mic.keys) {
+            mic.keys.map((value, index) => {
+                let a = config[value[0].charAt(0)] + value[0].charAt(1);
+                let b = value[1];
+                returnMic.keys.push([a,b]);
+            })
+        }
+        return returnMic;
+    }
     render() {
         return (
             <div>
