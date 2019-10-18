@@ -23,6 +23,7 @@ class Piano extends React.Component {
         this.selectIndex = 0;
         this.speed = 1;
         this.audios = {};
+        this.stepTimer = 0;
         if(window.location.host !== ''){
             this.initAudios();
         }
@@ -92,7 +93,7 @@ class Piano extends React.Component {
         if (item) {
             let miniTime = (record.miniTime ? record.miniTime : 1) / this.speed;
             let delay = item[1] * miniTime;
-            that.playPinalKey(item[0], true, delay - miniTime / 3);
+            that.playPianoKey(item[0], true, delay - miniTime / 3);
             that.stepTimer = setTimeout(() => {
                 clearTimeout(that.stepTimer);
                 that.playStep(record, ++i);
@@ -124,12 +125,12 @@ class Piano extends React.Component {
         return _voice;
     }
     onPlayKeyDown(e) {
-        this.playPinalKey(this.keyCodeToVoice(e.keyCode), true);
+        this.playPianoKey(this.keyCodeToVoice(e.keyCode), true);
     }
     onPlayKeyUp(e) {
-        this.playPinalKey(this.keyCodeToVoice(e.keyCode), false);
+        this.playPianoKey(this.keyCodeToVoice(e.keyCode), false);
     }
-    playPinalKey(n, b, autoKeyUp = NaN) {
+    playPianoKey(n, b, autoKeyUp = NaN) {
         if (!n) return;
         if (b) {
             if (!this['key' + n]) {
