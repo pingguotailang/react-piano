@@ -225,7 +225,7 @@ export const musicScoreConvert = (mics) => {
         '7': 'b'
     }
     let _mics = [];
-    mics.map((mic) => {
+    mics.forEach((mic) => {
         if (mic.type && mic.type === 'easy'){
             let returnMic = {};
             returnMic.name = mic.name;
@@ -242,7 +242,6 @@ export const musicScoreConvert = (mics) => {
         }else{
             _mics.push(mic);
         }
-        // return mic;
     })
     return _mics;
 }
