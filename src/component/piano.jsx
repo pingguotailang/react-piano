@@ -8,7 +8,6 @@ import 'antd/lib/switch/style';
 class Piano extends React.Component {
     constructor(props) {
         super(props);
-        // let wo = this.musicScoreConvert(wodezuguo);
         this.state = {
             keys: keys,
             isRecord: false,
@@ -92,7 +91,7 @@ class Piano extends React.Component {
         if (item) {
             let miniTime = (record.miniTime ? record.miniTime : 1) / this.speed;
             let delay = item[1] * miniTime;
-            that.playPianoKey(item[0], true, delay - miniTime / 3);
+            that.playPianoKey(item[0], true, delay / 3);
             that.stepTimer = setTimeout(() => {
                 clearTimeout(that.stepTimer);
                 that.playStep(record, ++i);

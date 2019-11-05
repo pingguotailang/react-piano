@@ -1,5 +1,6 @@
 import React from "react";
 import './keyless.less';
+import PropTypes from 'prop-types';
 class PianoKey extends React.Component {
     constructor(props) {
         super(props);
@@ -51,5 +52,14 @@ class PianoKey extends React.Component {
             </button>
         )
     }
+}
+PianoKey.PropTypes = {
+    voice:PropTypes.string,
+    color:PropTypes.string,
+    w:PropTypes.number,
+    h:PropTypes.number,
+    x:PropTypes.number,
+    audio:PropTypes.func,
+    onKeyPlayEnd:PropTypes.func
 }
 export default PianoKey;

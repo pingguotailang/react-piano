@@ -15,7 +15,7 @@ module.exports = {
   },
   plugins: [
     new HTMLWebpackPlugin({
-      title: '猎豹前端框架',
+      title: 'piano',
       template: './src/index.html' // 使用模版
     }),
     // new webpack.optimize.UglifyJsPlugin(),
