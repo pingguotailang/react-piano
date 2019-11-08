@@ -164,7 +164,7 @@ class Piano extends React.Component {
             <div>
                 <button style={{ width: 100 }} onClick={this.recordOption.bind(this)}>{this.state.isRecord ? 'stop record' : 'record'}</button>
                 <button style={{ width: 100 }} onClick={this.playAuto.bind(this)}>{this.state.isPlaying ? 'stop playing' : 'play'}</button>
-                <span>播放列表：</span>
+                <span dangerouslySetInnerHTML={{__html:"播放列表".big()+`<sup>♥</sup>`}}></span>
                 <select
                     style={{ minWidth: 100 }}
                     id="AreaId" name="AreaId"
