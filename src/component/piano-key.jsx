@@ -8,10 +8,12 @@ class PianoKey extends React.Component {
             currentClassName: "key-up",
         }
     }
+    //键盘按钮点击事件，也会被键盘按下调用
     keyDown = () => {
         this.playMusic();
         this.setState({ currentClassName: 'key-down' });
     }
+    //键盘按钮鼠标抬起事件，也会被键盘抬起调用
     keyUp = () => {
         this.setState({ currentClassName: 'key-up' });
         this.props.onKeyPlayEnd && this.props.onKeyPlayEnd();

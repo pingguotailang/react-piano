@@ -46,73 +46,88 @@ class Piano extends React.Component {
             xhr.send();
         })
     }
-    componentDidMount() {
-
-    }
+    //调节速度
     onSliderChange(value) {
         this.speed = value;
     }
+    //录音
     recordOption() {
+        //设置录音状态
         let isRecord = !this.state.isRecord;
         this.setState({ isRecord: !this.state.isRecord });
-        if (isRecord) {
+        if (isRecord) { //开始录音
+            //初始化录音
             this['music' + this.recordIndex] = [];
             let p = [undefined, 0];
             this.recordStartTime = new Date().getTime();
             this['music' + this.recordIndex].push(p);
-        } else {
+        } else { //结束录音
             let _records = Array.from(this.state.records);
             let currentRecord = this['music' + this.recordIndex];
             let len = currentRecord.length;
+            //创建一个新的空录音对象
             let newRecord = {
                 name: 'music ' + this.recordIndex,
                 miniTime: 1,
                 keys: []
             };
-            currentRecord.map((item, index) => {
+            //转换成可识别的数据
+            currentRecord.forEach((item, index) => {
                 if (index < len - 1) {
                     newRecord.keys.push([item[0], currentRecord[index + 1][1] - item[1]]);
                 } else if (index === len - 1) {
                     newRecord.keys.push([item[0], 0]);
                 }
             })
+            //装入录音列表
             _records.push(newRecord);
             this.setState({ records: _records });
-            if (this.recordIndex === 0) {
-                this.selectIndex = 0;
-            }
             this.recordIndex++;
         }
     }
+    /**
+     * 顺序播放音符
+     * @param {*} record 音符集
+     * @param {*} i 序号
+     */
     playStep(record, i) {
         let item = record.keys[i];
         let that = this;
         clearTimeout(that.stepTimer);
         if (item) {
+            //求出一个音符播放时延
             let miniTime = (record.miniTime ? record.miniTime : 1) / this.speed;
             let delay = item[1] * miniTime;
+            //播放一个音符，并自动弹起琴键
             that.playPianoKey(item[0], true, delay / 3);
+            //播放下一个音符
             that.stepTimer = setTimeout(() => {
                 clearTimeout(that.stepTimer);
                 that.playStep(record, ++i);
             }, delay)
         } else {
+            //播放完毕后，自动停止
             this.setState({ isPlaying: false });
         }
     }
+    //播放音乐
     playAuto() {
         let _isPlaying = !this.state.isPlaying;
         this.setState({ isPlaying: _isPlaying });
+        //播放当前列表选中音乐
         if (_isPlaying) {
             let record = this.state.records[this.selectIndex];
             this.playStep(record, 0);
         } else {
+            //停止播放
             clearTimeout(this.stepTimer);
         }
     }
-    onRecordChange(e) {
+    //播放列表选择切换
+    onMusicListChange(e) {
         this.selectIndex = e.target.selectedIndex;
     }
+    //通过键盘code找到对应键盘配置
     keyCodeToVoice(keyCode) {
         try {
             let _item = keys.find((item) =>
@@ -123,35 +138,48 @@ class Piano extends React.Component {
             return null;
         }
     }
+    //键盘按下，播放声音
     onPlayKeyDown(e) {
         this.playPianoKey(this.keyCodeToVoice(e.keyCode), true);
     }
+    //键盘抬起，结束播放效果
     onPlayKeyUp(e) {
         this.playPianoKey(this.keyCodeToVoice(e.keyCode), false);
     }
-    playPianoKey(n, b, autoKeyUp = NaN) {
-        if (!n) return;
+    /**
+     * 键盘播放声音
+     * @param {string} v voice值
+     * @param {boolean} b 键盘按下or抬起
+     * @param {boolean} autoKeyUp 是否自动抬起
+     */
+    playPianoKey(v, b, autoKeyUp = NaN) {
+        if (!v) return;
+        //键盘按下
         if (b) {
-            if (!this['key' + n]) {
-                this["btn" + n].keyDown();
-                this['key' + n] = true;
+            if (!this['key' + v]) {
+                this["btn" + v].keyDown();
+                this['key' + v] = true;
             }
             if (autoKeyUp) {
                 let that = this;
                 let temp = setTimeout(() => {
-                    that["btn" + n].keyUp();
-                    that['key' + n] = false;
+                    that["btn" + v].keyUp();
+                    that['key' + v] = false;
                     clearTimeout(temp);
                 }, autoKeyUp)
             }
+        //键盘抬起
         } else {
-            this["btn" + n].keyUp();
-            this['key' + n] = false;
+            this["btn" + v].keyUp();
+            this['key' + v] = false;
         }
     }
+    //键盘按键抬起后回调
     onKeyPlayEnd(value) {
+        //录制
         this.recordOne(value.voice);
     }
+    //将一次键盘点击事件录制到录音记录中
     recordOne(voice) {
         if (this.state.isRecord) {
             let time = new Date().getTime() - this.recordStartTime;
@@ -170,7 +198,7 @@ class Piano extends React.Component {
                     style={{ minWidth: 100 }}
                     id="AreaId" name="AreaId"
                     size="1"
-                    onChange={this.onRecordChange.bind(this)}>
+                    onChange={this.onMusicListChange.bind(this)}>
                     {
                         this.state.records.map((item, index) =>
                             <option

@@ -2,6 +2,8 @@
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   //打包源文件
@@ -14,6 +16,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   plugins: [
+    new CleanWebpackPlugin(['dist/']),
     new HTMLWebpackPlugin({
       title: 'piano',
       template: './src/index.html' // 使用模版
@@ -24,6 +27,13 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery'
     }),
+    // 拷贝本地静态数据
+    new CopyWebpackPlugin(
+      [
+        { from: './src/audio', to: 'audio' },
+      ],
+      { ignore: [], copyUnmodified: true, debug: 'debug' }
+    )
   ],
   module: {
     rules: [{
