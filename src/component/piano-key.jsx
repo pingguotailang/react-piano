@@ -21,7 +21,7 @@ class PianoKey extends React.Component {
         if (window.location.host === "") {
             let audio = new Audio();
             // 设置好音频路径 
-            audio.src = "audio/" + this.props.voice + ".mp3";
+            audio.src = "audio/" + this.props.timbre + '/' + this.props.voice + ".mp3";
             // 播放音频 
             audio.play();
         //在线播放模式
@@ -60,6 +60,7 @@ PianoKey.PropTypes = {
     h:PropTypes.number,
     x:PropTypes.number,
     audio:PropTypes.func,
-    onKeyPlayEnd:PropTypes.func
+    onKeyPlayEnd:PropTypes.func,
+    timbre:PropTypes.string
 }
 export default PianoKey;

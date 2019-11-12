@@ -1,6 +1,6 @@
 import React from "react";
 import PianoKey from "./piano-key.jsx";
-import {keys} from './key-config';
+import { keys } from './key-config';
 import music from '../music-score.js';
 import { Slider, Switch } from 'antd';
 import 'antd/lib/slider/style';
@@ -9,10 +9,10 @@ class Piano extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            keys: keys,
             isRecord: false,
             records: music,
             isPlaying: false,
+            timbre: 'piano'
         }
         // 当键盘点击时，调用音乐响应函数 
         window.onkeydown = this.onPlayKeyDown.bind(this);
@@ -22,23 +22,23 @@ class Piano extends React.Component {
         this.speed = 1;
         this.audios = {};
         this.stepTimer = 0;
-        if(window.location.host !== ''){
+        if (window.location.host !== '') {
             this.initAudios();
         }
     }
     //初始化加载音频
-    initAudios(){
+    initAudios() {
         this.audios = [];
         let that = this;
-        keys.map((item)=>{
+        keys.forEach((item) => {
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            let audio = {context:new window.AudioContext()};
-            let audioURL = "audio/" + item.voice + ".mp3";
+            let audio = { context: new window.AudioContext() };
+            let audioURL = "audio/" + this.state.timbre + '/' + item.voice + ".mp3";
             let xhr = new XMLHttpRequest();
-            xhr.open('GET',audioURL,true);
+            xhr.open('GET', audioURL, true);
             xhr.responseType = 'arraybuffer';
             xhr.onload = (e) => {
-                audio.context.decodeAudioData(e.target.response,(buffer)=>{
+                audio.context.decodeAudioData(e.target.response, (buffer) => {
                     audio.buffer = buffer;
                     that.audios[item.voice] = audio;
                 })
@@ -114,13 +114,14 @@ class Piano extends React.Component {
         this.selectIndex = e.target.selectedIndex;
     }
     keyCodeToVoice(keyCode) {
-        let _voice;
-        this.state.keys.map((item, index) => {
-            if (item.keyCode === keyCode) {
-                _voice = item.voice;
-            };
-        })
-        return _voice;
+        try {
+            let _item = keys.find((item) =>
+                item.keyCode === keyCode
+            )
+            return _item.voice;
+        } catch (error) {
+            return null;
+        }
     }
     onPlayKeyDown(e) {
         this.playPianoKey(this.keyCodeToVoice(e.keyCode), true);
@@ -158,13 +159,13 @@ class Piano extends React.Component {
             this['music' + this.recordIndex].push(p);
         }
     }
-    
+
     render() {
         return (
             <div>
                 <button style={{ width: 100 }} onClick={this.recordOption.bind(this)}>{this.state.isRecord ? 'stop record' : 'record'}</button>
                 <button style={{ width: 100 }} onClick={this.playAuto.bind(this)}>{this.state.isPlaying ? 'stop playing' : 'play'}</button>
-                <span dangerouslySetInnerHTML={{__html:"播放列表".big()+`<sup>♥</sup>`}}></span>
+                <span dangerouslySetInnerHTML={{ __html: "播放列表".big() + `<sup>♥</sup>` }}></span>
                 <select
                     style={{ minWidth: 100 }}
                     id="AreaId" name="AreaId"
@@ -182,12 +183,13 @@ class Piano extends React.Component {
                 <Slider defaultValue={1} max={1.5} min={0.5} onChange={this.onSliderChange.bind(this)} step={0.01} />
                 <div style={{ display: "flex" }}>
                     {
-                        this.state.keys.map(
+                        keys.map(
                             (value, index) => <PianoKey
                                 ref={node => this['btn' + value.voice] = node}
                                 onKeyPlayEnd={this.onKeyPlayEnd.bind(this, value)}
                                 key={index + 'key'}
                                 audio={() => this.audios[value.voice]}
+                                timbre={this.state.timbre}
                                 {...value}
                                 index={index} />
                         )
