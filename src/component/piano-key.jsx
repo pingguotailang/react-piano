@@ -55,7 +55,7 @@ class PianoKey extends React.Component {
         )
     }
 }
-PianoKey.PropTypes = {
+PianoKey.propTypes = {
     voice:PropTypes.string,
     color:PropTypes.string,
     w:PropTypes.number,
