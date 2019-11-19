@@ -54,7 +54,7 @@ class Piano extends React.Component {
     recordOption() {
         //设置录音状态
         let isRecord = !this.state.isRecord;
-        this.setState({ isRecord: !this.state.isRecord });
+        this.setState({ isRecord });
         if (isRecord) { //开始录音
             //初始化录音
             this['music' + this.recordIndex] = [];
@@ -62,7 +62,7 @@ class Piano extends React.Component {
             this.recordStartTime = new Date().getTime();
             this['music' + this.recordIndex].push(p);
         } else { //结束录音
-            let _records = Array.from(this.state.records);
+            let records = Array.from(this.state.records);
             let currentRecord = this['music' + this.recordIndex];
             let len = currentRecord.length;
             //创建一个新的空录音对象
@@ -80,8 +80,8 @@ class Piano extends React.Component {
                 }
             })
             //装入录音列表
-            _records.push(newRecord);
-            this.setState({ records: _records });
+            records.push(newRecord);
+            this.setState({ records });
             this.recordIndex++;
         }
     }
@@ -112,10 +112,10 @@ class Piano extends React.Component {
     }
     //播放音乐
     playAuto() {
-        let _isPlaying = !this.state.isPlaying;
-        this.setState({ isPlaying: _isPlaying });
+        let isPlaying = !this.state.isPlaying;
+        this.setState({ isPlaying });
         //播放当前列表选中音乐
-        if (_isPlaying) {
+        if (isPlaying) {
             let record = this.state.records[this.selectIndex];
             this.playStep(record, 0);
         } else {
