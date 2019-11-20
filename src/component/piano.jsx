@@ -50,41 +50,7 @@ class Piano extends React.Component {
     onSliderChange(value) {
         this.speed = value;
     }
-    //录音
-    recordOption() {
-        //设置录音状态
-        let isRecord = !this.state.isRecord;
-        this.setState({ isRecord });
-        if (isRecord) { //开始录音
-            //初始化录音
-            this['music' + this.recordIndex] = [];
-            let p = [undefined, 0];
-            this.recordStartTime = new Date().getTime();
-            this['music' + this.recordIndex].push(p);
-        } else { //结束录音
-            let records = Array.from(this.state.records);
-            let currentRecord = this['music' + this.recordIndex];
-            let len = currentRecord.length;
-            //创建一个新的空录音对象
-            let newRecord = {
-                name: 'music ' + this.recordIndex,
-                miniTime: 1,
-                keys: []
-            };
-            //转换成可识别的数据
-            currentRecord.forEach((item, index) => {
-                if (index < len - 1) {
-                    newRecord.keys.push([item[0], currentRecord[index + 1][1] - item[1]]);
-                } else if (index === len - 1) {
-                    newRecord.keys.push([item[0], 0]);
-                }
-            })
-            //装入录音列表
-            records.push(newRecord);
-            this.setState({ records });
-            this.recordIndex++;
-        }
-    }
+
     /**
      * 顺序播放音符
      * @param {*} record 音符集
@@ -98,8 +64,8 @@ class Piano extends React.Component {
             //求出一个音符播放时延
             let miniTime = (record.miniTime ? record.miniTime : 1) / this.speed;
             let delay = item[1] * miniTime;
-            //播放一个音符，并自动弹起琴键
-            that.playPianoKey(item[0], true, delay / 3);
+            //播放一个音符，并自动弹起琴键。若无弹起时间参数，则默认本音符播放一半时，抬起琴键。
+            that.playPianoKey(item[0], true, item[2] ? item[2] : delay / 2);
             //播放下一个音符
             that.stepTimer = setTimeout(() => {
                 clearTimeout(that.stepTimer);
@@ -150,35 +116,81 @@ class Piano extends React.Component {
      * 键盘播放声音
      * @param {string} v voice值
      * @param {boolean} b 键盘按下or抬起
-     * @param {boolean} autoKeyUp 是否自动抬起
+     * @param {boolean} keyUpTime 琴键弹起时间
      */
-    playPianoKey(v, b, autoKeyUp = NaN) {
+    playPianoKey(v, b, keyUpTime) {
         if (!v) return;
         //键盘按下
         if (b) {
-            if (!this['key' + v]) {
+            if (!this["btn" + v].isKeyDown) {
                 this["btn" + v].keyDown();
-                this['key' + v] = true;
             }
-            if (autoKeyUp) {
+            if (!isNaN(keyUpTime)) {
                 let that = this;
                 let temp = setTimeout(() => {
                     that["btn" + v].keyUp();
-                    that['key' + v] = false;
                     clearTimeout(temp);
-                }, autoKeyUp)
+                }, keyUpTime)
             }
-        //键盘抬起
+            //键盘抬起
         } else {
             this["btn" + v].keyUp();
-            this['key' + v] = false;
+        }
+    }
+    //录音
+    recordOption() {
+        //设置录音状态
+        let isRecord = !this.state.isRecord;
+        this.setState({ isRecord });
+        if (isRecord) { //开始录音
+            //初始化录音
+            this['music' + this.recordIndex] = [];
+            let p = [undefined, 0, 0];
+            this.recordStartTime = new Date().getTime();
+            this['music' + this.recordIndex].push(p);
+        } else { //结束录音
+
+            let records = Array.from(this.state.records);
+            let currentRecord = this['music' + this.recordIndex];
+            let len = currentRecord.length;
+            let lastV = currentRecord[len - 1];
+            lastV && (lastV[1] = new Date().getTime() - this.recordStartTime);
+            //创建一个新的空录音对象
+            let newRecord = {
+                name: 'music ' + this.recordIndex,
+                miniTime: 1,
+                keys: currentRecord
+            };
+            //装入录音列表
+            records.push(newRecord);
+            this.setState({ records });
+            this.recordIndex++;
+        }
+    }
+    //键盘按键按下后回调
+    onKeyPlayStart(value) {
+        //录制
+        if (this.state.isRecord) {
+            let len = this['music' + this.recordIndex].length;
+            let lastV = this['music' + this.recordIndex][len - 1];
+            //找出上一个记录点，记录播放时延
+            lastV && (lastV[1] = new Date().getTime() - this.recordStartTime);
+            this.recordStartTime = new Date().getTime();
+            let p = [value.voice, 0, 0];
+            this['music' + this.recordIndex].push(p);
         }
     }
     //键盘按键抬起后回调
     onKeyPlayEnd(value) {
         //录制
-        this.recordOne(value.voice);
+        if (this.state.isRecord) {
+            let len = this['music' + this.recordIndex].length;
+            let lastV = this['music' + this.recordIndex][len - 1];
+            //找出上一个记录点，记录按键抬起时延
+            lastV && (lastV[2] = new Date().getTime() - this.recordStartTime);
+        }
     }
+
     //将一次键盘点击事件录制到录音记录中
     recordOne(voice) {
         if (this.state.isRecord) {
@@ -215,6 +227,7 @@ class Piano extends React.Component {
                             (value, index) => <PianoKey
                                 ref={node => this['btn' + value.voice] = node}
                                 onKeyPlayEnd={this.onKeyPlayEnd.bind(this, value)}
+                                onKeyPlayStart={this.onKeyPlayStart.bind(this, value)}
                                 key={index + 'key'}
                                 audio={() => this.audios[value.voice]}
                                 timbre={this.state.timbre}

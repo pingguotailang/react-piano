@@ -8,13 +8,17 @@ class PianoKey extends React.Component {
             currentClassName: "key-up",
         }
     }
+    isKeyDown = false
     //键盘按钮点击事件，也会被键盘按下调用
     keyDown = () => {
+        this.isKeyDown = true;
         this.playMusic();
         this.setState({ currentClassName: 'key-down' });
+        this.props.onKeyPlayStart && this.props.onKeyPlayStart();
     }
     //键盘按钮鼠标抬起事件，也会被键盘抬起调用
     keyUp = () => {
+        this.isKeyDown = false;
         this.setState({ currentClassName: 'key-up' });
         this.props.onKeyPlayEnd && this.props.onKeyPlayEnd();
     }
@@ -63,6 +67,7 @@ PianoKey.propTypes = {
     x:PropTypes.number,
     audio:PropTypes.func,
     onKeyPlayEnd:PropTypes.func,
+    onKeyPlayStart:PropTypes.func,
     timbre:PropTypes.string
 }
 export default PianoKey;
